@@ -10,3 +10,9 @@ $python embedding.py
 # Citation:
 
 Seyeditabari, A., Tabari, N., Gholizadeh, S., & Zadrozny, W. (2019). Emotional Embeddings: Refining Word Embeddings to Capture Emotional Content of Words. arXiv preprint arXiv:1906.00112.
+
+# Forked from:
+https://github.com/armintabari/Emotional-Embedding
+
+# My Contribution:
+I made it compatible with python3 
