@@ -2,7 +2,7 @@
 This code is a modified version of https://github.com/nmrksic/counter-fitting for creating emotional embeddings.
 Developed by Armin Seyeditabari & Narges Tabari.
 '''
-import ConfigParser
+import configparser
 import numpy
 import sys
 import time
@@ -25,11 +25,11 @@ class ExperimentRun:
 
 		To start, first supply the config file. This function reads that file. 
 		"""
-		self.config = ConfigParser.RawConfigParser()
+		self.config = configparser.RawConfigParser()
 		try:
 			self.config.read(config_filepath)
 		except:
-			print "Could not read config file from", config_filepath
+			print("Could not read config file from", config_filepath)
 			return None
 
 		self.pretrained_vectors_filepath = self.config.get("data", "pretrained_vectors_filepath")
@@ -81,15 +81,15 @@ class ExperimentRun:
 		self.rho      = self.config.getfloat("hyperparameters", "rho")
 
 
-		print "\nHyperparameters of this experiment (k_1, k_2, k_3, delta, gamma, rho):", \
-			   self.hyper_k1, self.hyper_k2, self.hyper_k3, self.delta, self.gamma, self.rho
+		print("\nHyperparameters of this experiment (k_1, k_2, k_3, delta, gamma, rho):", \
+			   self.hyper_k1, self.hyper_k2, self.hyper_k3, self.delta, self.gamma, self.rho)
 
 
 def load_word_vectors(file_destination, vocabulary):
 	"""
 	Loading the word vectors form the file path, then prints size, and vector dimentionality. 
 	"""
-	print "Loading pretrained word vectors from", file_destination
+	print("Loading pretrained word vectors from", file_destination)
 	word_dictionary = {}
 
 	try:
@@ -100,12 +100,12 @@ def load_word_vectors(file_destination, vocabulary):
 				if key in vocabulary:	
 					word_dictionary[key] = numpy.fromstring(line[1], dtype="float32", sep=" ")
 	except:
-		print "Could not load word vectors from:", file_destination
+		print("Could not load word vectors from:", file_destination)
 		if file_destination == "word_vectors/glove.txt" or file_destination == "word_vectors/paragram.txt":
-			print "Please unzip the provided glove/paragram vectors in the word_vectors directory.\n"
+			print ("Please unzip the provided glove/paragram vectors in the word_vectors directory.\n")
 		return {}
 
-	print len(word_dictionary), "vectors loaded from", file_destination			
+	print(len(word_dictionary), "vectors loaded from", file_destination)	
 	return normalise_word_vectors(word_dictionary)
 
 
@@ -113,28 +113,28 @@ def print_word_vectors(word_vectors, write_path):
 	"""
 	This method saves the counter-fitted word vectors in a text file. 
 	"""
-	print "Saving the counter-fitted word vectors to", write_path, "\n"
-	with open(write_path, "wb") as f_write:
+	print("Saving the counter-fitted word vectors to", write_path, "\n")
+	with open(write_path, "w") as f_write:
 		for key in word_vectors:
-			print >>f_write, key, " ".join(map(str, numpy.round(word_vectors[key], decimals=6))) 
+			print(key, " ".join(map(str, numpy.round(word_vectors[key], decimals=6))), file=f_write )
 
 
 def print_all_vectorst(word_vectors, all_vectors, write_path):
 	# print all_vectors['the']
 	# new_vector_space = all_vectors.copy()
-	temp = all_vectors['the']
-	print '*************' , len(all_vectors)
-	for key, value in word_vectors.iteritems():
+	temp = all_vectors['one']
+	print('*************' , len(all_vectors))
+	for key, value in word_vectors.items():
 		all_vectors[key] = value
 	# print temp - all_vectors['the']
 
-	with open(write_path, "wb") as f_write:
+	with open(write_path, "w") as f_write:
 		for key in all_vectors:
 			if key == 'the':
-				print temp - all_vectors[key]
-				print key
-			print >> f_write, key, " ".join(map(str, numpy.round(all_vectors[key], decimals=6)))
-			
+				print (temp - all_vectors[key])
+				print (key)
+			#print >> f_write, key, " ".join(map(str, numpy.round(all_vectors[key], decimals=6)))
+			print(key, " ".join(map(str, numpy.round(all_vectors[key], decimals=6))) , file=f_write )
 
 def normalise_word_vectors(word_vectors, norm=1.0):
 	"""
@@ -160,7 +160,7 @@ def load_constraints(constraints_filepath, vocabulary):
 				constraints |= {(word_pair[0], word_pair[1])}
 				constraints |= {(word_pair[1], word_pair[0])}
 
-	print constraints_filepath, "yielded", len(constraints), "constraints."
+	print (constraints_filepath, "yielded", len(constraints), "constraints.")
 
 	return constraints
 
@@ -186,7 +186,7 @@ def compute_vsp_pairs(word_vectors, vocabulary, rho=0.2):
 	"""
 	# first computing the pair of words that have Cosine similarity more than .8
 	
-	print "Pre-computing word pairs relevant for Vector Space Preservation (VSP). Rho =", rho
+	print ("Pre-computing word pairs relevant for Vector Space Preservation (VSP). Rho =", rho)
 
 	vsp_pairs = {}
 
@@ -195,7 +195,7 @@ def compute_vsp_pairs(word_vectors, vocabulary, rho=0.2):
 	num_words = len(vocabulary)
 
 	step_size = 1000 # size of word vectors to consider at each step. 
-	vector_size = random.choice(word_vectors.values()).shape[0]
+	vector_size = random.choice(list(word_vectors.values())).shape[0]
 
 	# ranges of indices:
 	list_of_ranges = []
@@ -367,8 +367,8 @@ def counter_fit(current_experiment,kmulti=1):
 			del vsp_pairs[antonym_pair]
 
 	max_iter = 20
-	print "\nAntonym pairs:", len(antonyms), "Synonym pairs:", len(synonyms), "VSP pairs:", len(vsp_pairs)
-	print "Running the optimisation procedure for", max_iter, "SGD steps..."
+	print ("\nAntonym pairs:", len(antonyms), "Synonym pairs:", len(synonyms), "VSP pairs:", len(vsp_pairs))
+	print ("Running the optimisation procedure for", max_iter, "SGD steps...")
 
 	while current_iteration < max_iter:
 		current_iteration += 1
@@ -381,7 +381,7 @@ def load_all_word_vectors(file_destination):
 	This method loads the word vectors from the supplied file destination. 
 	It loads the dictionary of word vectors and prints its size and the vector dimensionality. 
 	"""
-	print "Loading all pretrained word vectors from", file_destination
+	print ("Loading all pretrained word vectors from", file_destination)
 	word_dictionary = {}
 
 	try:
@@ -391,12 +391,12 @@ def load_all_word_vectors(file_destination):
 				key = line[0].lower()
 				word_dictionary[key] = numpy.fromstring(line[1], dtype="float32", sep=" ")
 	except:
-		print "Word vectors could not be loaded from:", file_destination
+		print ("Word vectors could not be loaded from:", file_destination)
 		if file_destination == "word_vectors/glove.txt" or file_destination == "word_vectors/paragram.txt":
-			print "Please unzip the provided glove/paragram vectors in the word_vectors directory.\n"
+			print ("Please unzip the provided glove/paragram vectors in the word_vectors directory.\n")
 		return {}
 
-	print len(word_dictionary), "vectors loaded from", file_destination
+	print (len(word_dictionary), "vectors loaded from", file_destination)
 	return normalise_word_vectors(word_dictionary)
 
 
@@ -416,7 +416,7 @@ def run_experiment(config_filepath):
 	'''
 	emotion_importance = 1
 	for i in range(0, emotion_importance):
-		print '########### emotion importance out of 10 = ', i
+		print ('########### emotion importance out of 10 = ', i)
 		transformed_word_vectors = counter_fit(current_experiment,kmulti=i+1)
 		
 		fname = "results/counter_fitted_vectors-"+str(i)+".txt"
@@ -437,7 +437,7 @@ def main():
 	try:
 		config_filepath = sys.argv[1]
 	except:
-		print "\nUsing the default config file: experiment_parameters.cfg"
+		print ("\nUsing the default config file: experiment_parameters.cfg")
 		config_filepath = "experiment_parameters.cfg"
 
 	run_experiment(config_filepath)
